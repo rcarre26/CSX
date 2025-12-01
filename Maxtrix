@@ -1,0 +1,216 @@
+'''
+Name: Ryan Carre
+Date: xxx
+Description:
+Bugs: None
+Features: 
+Sources: None
+Log: 1.0
+'''
+
+'''
+description
+args
+    (classify what's inside parentheses above): put what type of function it is, what it does
+returns:
+    describe the output
+    (put)
+
+    ^put this for every function "def"
+
+'''
+
+
+class Matrix: # matrix class that will store the list of lists data and the methods (operations)
+    def __init__(self, data): # constructor for the matrix class, self rep. new object being create & data rep. the matrix values of it
+        self.data = data # saves the numbers of the matrix
+        self.rows = len(data) # number of rows in  matrix, which corresponds to number of inner lists
+        self.columns = len(data[0]) # number of columns (assuming at least one row), which corresponds to number of elements in each row
+    
+    # OPERATIONS STEPS 1-4:
+    def print(self): # PRINT
+        for row in self.data: #each row is a list, printed row by row
+            print(row)
+    
+    def plus(self, other): #ADDITION/SUBTRACTION... of self (A) and other (B)
+
+        '''
+        adds together matrix A and B
+        args:
+            (array, array) 2 matrices with dimensions/values inputted by user
+        returns:
+            (array) summed matrix of A and B
+        '''
+
+        #first check that the matrices have the same dimensions!
+        if self.rows != other.rows or self.columns != other.columns: #when incompatible dimensions...
+            raise ValueError("Cannot add matrices: the dimensions are not the same") #...Error message appears
+        
+        result_data = [] #if dimensions the same, result will be printed as a new list of lists of the corresponding numbers
+
+        for r in range(self.rows):
+            new_row = [] #a new row for the resulting sum
+
+            #create a loop for each column
+            for c in range(self.columns):
+                s = self.data[r][c] + other.data[r][c] #calling the corresponding values from matrix 1 and 2 to be added
+                new_row.append(s)
+                #index [r] chooses the row, index [c] chooses the column inside that specific row
+
+            result_data.append(new_row) #adds the summed values to the end of this new list
+
+        return Matrix(result_data) #returns a new matrix from the new lists
+    
+    def multi(self, other): #MULTIPLICATION
+        #first need to check that the dimensions are compatible:
+        if self.columns != other.rows: #if the 1st matrix # columns doesn't equal the 2nd's # rows...
+            raise ValueError("Cannot multiple matrices: the dimensions are incompatible")
+        
+        result_data = [] #stores the new matrix rows
+
+        for r in range(self.rows):
+            new_row = []
+            for c in range(other.columns): #compute an entry (r, c) of the result, starting with 0 then adding up the products
+                total = 0
+                for k in range (self.columns):
+                    total += self.data[r][k] * other.data[k][c] #multiply the corresponding values and then add to a total
+
+                new_row.append(total)
+
+            result_data.append(new_row)
+            
+        return Matrix(result_data)
+    
+    def scalarTimesRow(self, scalar, rownumber): #SCALAR
+        r_index = rownumber - 1 #sets first row = the zero-th row, since python starts with 0 
+        if r_index < 0 or r_index >= self.rows: #checks that the requested row actually exists
+            raise ValueError("Invalid row number requested") #...raises error
+        
+        new_data = []
+        #a NEW matrix is printed, but original remains unchanged
+        for r in range(self.rows):
+            if r == r_index: #goes through each row... for the row that == the requested r it will scale only that row, the rest will go to the else: below
+                new_row = []
+                for value in self.data[r]:
+                    new_row.append(scalar * value) #does the actual scaling here!
+                new_data.append(new_row)
+            else: #copies all of the other rows that aren't being scaled one by one
+                new_row = []
+                for value in self.data[r]:
+                    new_row.append(value)
+                new_data.append(new_row)
+
+        return Matrix(new_data)
+    
+
+
+#USER INPUT FUNCTIONS:
+    #(not part of the matrix class/mathematical calculations)
+
+def get_number(prompt): #ask the user for a number (float ok) and repeat if input is invalid (i.e. letters)
+    while True:
+        text = input(prompt)
+        try: #asks the code to try the command, will go to "except" for letters, double negs/decimals, etc. since unable to convert into a float!
+            return float(text) #converts the user's input (a string) into a number
+        except ValueError:
+            print("Invalid input. Please enter a number")
+
+def get_user_matrix(name): #ask user for the number of rows, columns, and each number to return a matrix object
+    print(f"Enter Matrix {name}")
+
+    #get # of rows:
+    rows_text = input("How many rows? ")
+    #isdigit command ensures that only whole positive numbers entered!
+    while not rows_text.isdigit(): #keeps on asking for the # rows until a valid input is entered
+        print("Please enter a positive whole number")
+        rows_text = input("How many rows? ")
+    rows = int(rows_text)
+
+    #get # of columns, via same process:
+    columns_text = input("How many columns? ")
+    while not columns_text.isdigit(): #keeps on asking for the # columns until a valid input is entered
+        print("Please enter a positive whole number")
+        columns_text = input("How many columns? ")
+    columns = int(columns_text)
+
+    data = [] #assigns the inputted values into their requested spots in the matrix
+    for r in range(rows):
+        row =[]
+        for c in range(columns):
+            value = get_number(f"Enter a value for row {r+1}, column {c+1}: ")
+            row.append(value)
+        data.append(row)
+
+    return Matrix(data)
+    
+#MAIN PROGRAM - controls the actual process the user goes through
+    #calls the data for the matrices + methods for operations from the matrix class
+    #asks the user for matrix A and B, prints both, does requested operations
+def main():
+
+    A = get_user_matrix("A") #get Matrix A
+    print("Matrix A: ")
+    A.print()
+
+    B = get_user_matrix("B") #get Matrix B
+    print("Matrix B: ")
+    B.print()
+        
+    #Show operation options to user:
+    print("Choose an operation to perform:")
+    print("1. Addition/Subtraction")
+    print("2. Multiplication")
+    print("3. Row Scaling")
+    choice = input("Enter 1, 2, or 3 for the desired operation: ")
+
+    if choice == "1": #proceed to addition/subtraction
+        if A.rows != B.rows or A.columns != B.columns:
+            print("Error: dimensions are not the same")
+        else:
+            result = A.plus(B)
+            print("A + B =")
+            result.print()
+
+    elif choice == "2": #proceed to multiplication
+        if A.columns != B.rows:
+            print("Error: incompatible dimensions")
+        else:
+            result = A.multi(B)
+            print("A x B =")
+            result.print()
+
+    elif choice == "3": #proceed to scaling a row
+        #first ask which matrix is wanted for scaling
+        print("Which matrix do you want to scale?")
+        print("1. Matrix A")
+        print("2. Matrix B")
+        matrix_choice = input("Enter the option number: ")
+
+        if matrix_choice == "1":
+            target = A
+            print("You selected Matrix A.")
+        elif matrix_choice == "2":
+            target = B
+            print("You selected Matrix B.")
+        else:
+            print("Invalid choice.")
+            return
+
+        scalar = get_number("Enter scalar value: ") #ask for scalar value
+        row_text = input("Which number row should be scaled?: ") #ask for which row will be scaled
+        while not row_text.isdigit():
+            print("Please enter a valid row number") #repeats prompt for inputs that aren't numbers
+            row_text = input("Which number row should be scaled?: ")
+        row = int(row_text)
+
+        if row < 1 or row > target.rows: #checks that the number is actually a valid/existing row
+            print("Error: invalid row number")
+        else:
+            result = target.scalarTimesRow(scalar, row)
+            print("New scaled result:")
+            result.print()
+
+    else:
+        print("Invalid operation choice") #for when the user doesn't pick any of the offered operations choices
+
+main() #run main program
